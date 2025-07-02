@@ -16,7 +16,7 @@ from utils.arguments import load_opt_command
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def init_wandb(args, job_dir, entity='xueyanz', project='xdecoder', job_name='tmp'):
+def init_wandb(args, job_dir, entity='birdzzh', project='seem_1121', job_name='tmp'):
     wandb_dir = os.path.join(job_dir, 'wandb')
     os.makedirs(wandb_dir, exist_ok=True)
     runid = None
@@ -41,7 +41,7 @@ def main(args=None):
     2. Load the config file and set up the trainer.
     '''
 
-    opt, cmdline_args = load_opt_command(args)
+    opt, cmdline_args = load_opt_command(args)  # Load the config file and command line arguments
     command = cmdline_args.command
 
     if cmdline_args.user_dir:
@@ -58,12 +58,13 @@ def main(args=None):
     else:
         assert False, "The trainer type: {} is not defined!".format(opt['TRAINER'])
     
-    trainer = Trainer(opt)
+    trainer = Trainer(opt)  # Set up the trainer
     os.environ['TORCH_DISTRIBUTED_DEBUG']='DETAIL'
 
     if command == "train":
         if opt['rank'] == 0 and opt['WANDB']:
-            wandb.login(key=os.environ['WANDB_KEY'])
+            # wandb.login(key=os.environ['WANDB_KEY'])
+            wandb.login(key='ad7b4e7e8829a561d3282b174d7d6ca3a2437edb')
             init_wandb(opt, trainer.save_folder, job_name=trainer.save_folder)
         trainer.train()
     elif command == "evaluate":
@@ -74,3 +75,4 @@ def main(args=None):
 if __name__ == "__main__":
     main()
     sys.exit(0)
+    
