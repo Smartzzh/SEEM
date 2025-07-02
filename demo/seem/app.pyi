@@ -28,7 +28,7 @@ from demo.seem.tasks import *
 
 def parse_option():
     parser = argparse.ArgumentParser('SEEM Demo', add_help=False)
-    parser.add_argument('--conf_files', default="configs/seem/focalt_unicl_lang_demo.yaml", metavar="FILE", help='path to config file', )
+    parser.add_argument('--conf_files', default="configs/seem/focall_unicl_lang_demo.yaml", metavar="FILE", help='path to config file', )
     cfg = parser.parse_args()
     return cfg
 
@@ -42,9 +42,7 @@ opt = init_distributed(opt)
 # META DATA
 cur_model = 'None'
 if 'focalt' in cfg.conf_files:
-    # pretrained_pth = os.path.join("data/output/bijie_AFPN_pre/focalt_unicl_lang_v0.yaml_conf~/run_1/00004325/default/model_state_dict.pt")
-    # pretrained_pth = os.path.join("data/output/train_bijie_wu/focalt_unicl_lang_v0.yaml_conf~/run_2/00003450/default/model_state_dict.pt")
-    pretrained_pth = os.path.join("data/output/bijie_pre/focalt_unicl_lang_v0.yaml_conf~/run_3/00002875/default/model_state_dict.pt")
+    pretrained_pth = os.path.join("seem_focalt_v0.pt")
     if not os.path.exists(pretrained_pth):
         os.system("wget {}".format("https://huggingface.co/xdecoder/SEEM/resolve/main/seem_focalt_v0.pt"))
     cur_model = 'Focal-T'
@@ -73,6 +71,7 @@ def inference(image, task, *args, **kwargs):
             return interactive_infer_video(model, audio, image, task, *args, **kwargs)
         else:
             return interactive_infer_image(model, audio, image, task, *args, **kwargs)
+from gradio.events import Dependency
 
 class ImageMask(gr.components.Image):
     """
@@ -82,10 +81,14 @@ class ImageMask(gr.components.Image):
     is_template = True
 
     def __init__(self, **kwargs):
-        super().__init__(source="upload", tool="sketch", interactive=True, **kwargs)
+        super().__init__(sources="upload", tool="sketch", interactive=True, **kwargs)
 
     def preprocess(self, x):
         return super().preprocess(x)
+    from typing import Callable, Literal, Sequence, Any, TYPE_CHECKING
+    from gradio.blocks import Block
+    if TYPE_CHECKING:
+        from gradio.components import Timer
 
 class Video(gr.components.Video):
     """
@@ -99,12 +102,16 @@ class Video(gr.components.Video):
 
     def preprocess(self, x):
         return super().preprocess(x)
+    from typing import Callable, Literal, Sequence, Any, TYPE_CHECKING
+    from gradio.blocks import Block
+    if TYPE_CHECKING:
+        from gradio.components import Timer
 
 
 '''
 launch app
 '''
-title = "滑坡识别"
+title = "SEEM: Segment Everything Everywhere All At Once"
 description = """
 <div style="text-align: center; font-weight: bold;">
     <span style="font-size: 18px" id="paper-info">
