@@ -8,14 +8,14 @@
 # Define Test/Trainer/Saving
 PIPELINE: XDecoderPipeline
 TRAINER: xdecoder
-SAVE_DIR: '../../data/output/landslide_bijie1115'
+SAVE_DIR: '/public/S/seem/Segment-Everything-Everywhere-All-At-Once/data/output/train_bijie'
 base_path: "./"
 
 # Resume Logistic
-RESUME: false
-WEIGHT: false
-RESUME_FROM: ''
-EVAL_AT_START: false
+RESUME: False
+WEIGHT: False
+RESUME_FROM: 'data/output/bijie_pre/focalt_unicl_lang_v0.yaml_conf~/run_3/00002875/default/model_state_dict.pt'
+EVAL_AT_START: False
 
 # Logging and Debug
 WANDB: False
@@ -23,7 +23,7 @@ LOG_EVERY: 100
 FIND_UNUSED_PARAMETERS: false
 
 # Speed up training
-FP16: false
+FP16: True
 PORT: '36873'
 
 # misc
@@ -36,7 +36,7 @@ LOADER:
 ##################
 VERBOSE: true
 MODEL:
-  NAME: seem_model_v1
+  NAME: seem_model_v0
   HEAD: xdecoder_head
   MASK_ON: false
   KEYPOINT_ON: false
@@ -52,17 +52,32 @@ MODEL:
     LAYERS: 12 # 6
     AUTOGRESSIVE: True
   BACKBONE:
-    NAME: vit
-    PRETRAINED: '/nobackup3/xueyan-data/grin_data/output/sam/sam_vit_b_01ec64.pth'
-    LOAD_PRETRAINED: False
-    VIT:
-      SIZE: "base"
+    NAME: focal_dw
+    PRETRAINED: ''
+    LOAD_PRETRAINED: false
+    FOCAL:
+      PRETRAIN_IMG_SIZE: 224
+      PATCH_SIZE: 4
+      EMBED_DIM: 96
+      DEPTHS: [2, 2, 6, 2]
+      FOCAL_LEVELS: [3, 3, 3, 3]
+      FOCAL_WINDOWS: [3, 3, 3, 3]
+      DROP_PATH_RATE: 0.3
+      MLP_RATIO: 4.0
+      DROP_RATE: 0.0
+      PATCH_NORM: True
+      USE_CONV_EMBED: True
+      SCALING_MODULATOR: True
+      USE_CHECKPOINT: False
+      USE_POSTLN: true
+      USE_POSTLN_IN_MODULATION: false
+      USE_LAYERSCALE: True
       OUT_FEATURES: ["res2", "res3", "res4", "res5"]
       OUT_INDICES: [0, 1, 2, 3]
   ENCODER:
-    NAME: transformer_encoder_deform
+    NAME: transformer_encoder_fpn
     IGNORE_VALUE: 255
-    NUM_CLASSES: 133
+    NUM_CLASSES: 1
     LOSS_WEIGHT: 1.0
     CONVS_DIM: 512
     MASK_DIM: 512
@@ -72,7 +87,7 @@ MODEL:
     COMMON_STRIDE: 4
     TRANSFORMER_ENC_LAYERS: 6
   DECODER:
-    NAME: seem_v1
+    NAME: seem_v0
     TRANSFORMER_IN_FEATURE: "multi_scale_pixel_decoder"
     MASK:
       ENABLED: True
@@ -130,7 +145,7 @@ MODEL:
     # ENC_LAYERS: 0
     PRE_NORM: False
     ENFORCE_INPUT_PROJ: False
-    SIZE_DIVISIBILITY: 1024
+    SIZE_DIVISIBILITY: 32
     TRAIN_NUM_POINTS: 12544
     OVERSAMPLE_RATIO: 3.0
     IMPORTANCE_SAMPLE_RATIO: 0.75
@@ -141,10 +156,10 @@ MODEL:
     TOP_OPENIMAGE_LAYERS: 10
     TEST:
       SEMANTIC_ON: True
-      INSTANCE_ON: True
+      INSTANCE_ON: False  #数据增强
       PANOPTIC_ON: True
       OVERLAP_THRESHOLD: 0.8
-      OBJECT_MASK_THRESHOLD: 0.8
+      OBJECT_MASK_THRESHOLD: 0
       SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE: false
 
 # Spatial sampler
@@ -207,19 +222,23 @@ ATTENTION_ARCH:
   QUERY_NUMBER: 3
 
 DATASETS:
+  # TRAIN: ["coco_2017_train_panoptic_filtrefgumdval_with_sem_seg_caption_grounding_lvis",]
   TRAIN: ["coco_2017_train_panoptic_with_sem_seg_caption_grounding",]
-  TEST: ["coco_2017_val_panoptic_with_sem_seg", "pascalvoc_val_Point", "refcocog_val_umd"]  # to evaluate instance and semantic performance as well
+  # TRAIN: ["coco_2017_val_panoptic_with_sem_seg"]
+  # TRAIN: ["coco_2017_train_panoptic_with_sem_seg_caption_grounding",]
+  # TEST: ["coco_2017_val_panoptic_with_sem_seg", "pascalvoc_val_Point", "refcocog_val_umd"]  # to evaluate instance and semantic performance as well
+  TEST: ["coco_2017_val_panoptic_with_sem_seg"]
   # TEST: ["pascalvoc_val_Point"] # [pascalvoc, openimage600, ade600, davis, cocomini], [Point, Scribble, Polygon, Circle, Box]
   # TEST: ["cocomini_val_Point", "cocomini_val_Circle", "cocomini_val_Scribble", "cocomini_val_Polygon", "cocomini_val_Box"] # [pascalvoc, openimage600, ade600, davis, cocomini], [Point, Scribble, Polygon, Circle, Box]
   # TEST: ["ade600_val_Point", "ade600_val_Circle", "ade600_val_Scribble", "ade600_val_Polygon", "ade600_val_Box"] # [pascalvoc, openimage600, ade600, davis, cocomini], [Point, Scribble, Polygon, Circle, Box]
   # TEST: ["openimage600_val_Point", "openimage600_val_Circle", "openimage600_val_Scribble", "openimage600_val_Polygon", "openimage600_val_Box"] # [pascalvoc, openimage600, ade600, davis, cocomini], [Point, Scribble, Polygon, Circle, Box]
   CLASS_CONCAT: false
-  SIZE_DIVISIBILITY: 1024
+  SIZE_DIVISIBILITY: 32
   PROPOSAL_FILES_TRAIN: []
 
 INPUT:
-  PIXEL_MEAN: [81.491, 95.451, 77.775]
-  PIXEL_STD: [33.726, 35.679, 39.957]
+  PIXEL_MEAN: [123.675, 116.280, 103.530]
+  PIXEL_STD: [58.395, 57.120, 57.375]
 
 TRAIN:
   ASPECT_RATIO_GROUPING: true
@@ -239,7 +258,7 @@ TEST:
 
 DATALOADER:
   FILTER_EMPTY_ANNOTATIONS: False
-  NUM_WORKERS: 8
+  NUM_WORKERS: 1
   LOAD_PROPOSALS: False
   SAMPLER_TRAIN: "TrainingSampler"
   ASPECT_RATIO_GROUPING: True
@@ -249,15 +268,15 @@ COCO:
     MIN_SIZE_TRAIN: 800
     MAX_SIZE_TRAIN: 1333
     MIN_SIZE_TRAIN_SAMPLING: 'choice'
-    MIN_SIZE_TEST: 1000
-    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
     IMAGE_SIZE: 1024
     MIN_SCALE: 0.1
     MAX_SCALE: 2.0
     DATASET_MAPPER_NAME: "coco_interactive"
     IGNORE_VALUE: 255
     COLOR_AUG_SSD: False
-    SIZE_DIVISIBILITY: 1024
+    SIZE_DIVISIBILITY: 32
     RANDOM_FLIP: "horizontal"
     MASK_FORMAT: "polygon"
     FORMAT: "RGB"
@@ -302,8 +321,8 @@ SBD:
 
 VOC:
   INPUT:
-    MIN_SIZE_TEST: 1000
-    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
   DATALOADER:
     FILTER_EMPTY_ANNOTATIONS: False
     NUM_WORKERS: 0
@@ -315,8 +334,8 @@ VOC:
 
 DAVIS:
   INPUT:
-    MIN_SIZE_TEST: 1000
-    MAX_SIZE_TEST: 1024
+    MIN_SIZE_TEST: 800
+    MAX_SIZE_TEST: 1333
   DATALOADER:
     FILTER_EMPTY_ANNOTATIONS: False
     NUM_WORKERS: 0
@@ -343,13 +362,13 @@ REF:
   INPUT:
     PIXEL_MEAN: [123.675, 116.280, 103.530]
     PIXEL_STD: [58.395, 57.120, 57.375]
-    MIN_SIZE_TEST: 1000
+    MIN_SIZE_TEST: 512
     MAX_SIZE_TEST: 1024
     FORMAT: "RGB"
     SPATIAL: False
   DATALOADER:
     FILTER_EMPTY_ANNOTATIONS: False
-    NUM_WORKERS: 0
+    NUM_WORKERS: 4
     LOAD_PROPOSALS: False
     SAMPLER_TRAIN: "TrainingSampler"
     ASPECT_RATIO_GROUPING: False
