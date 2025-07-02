@@ -178,7 +178,8 @@ def interactive_infer_image(model, audio_model, image, tasks, refimg=None, reftx
     for idx, mask in enumerate(pred_masks_pos):
         # color = random_color(rgb=True, maximum=1).astype(np.int32).tolist()
         out_txt = texts[idx] if 'Text' not in tasks else reftxt
-        demo = visual.draw_binary_mask(mask, color=colors_list[pred_class[0]%133], text=out_txt)
+        # demo = visual.draw_binary_mask(mask, color=colors_list[pred_class[0]%133], text=out_txt)
+        demo = visual.draw_binary_mask(mask, color=[1, 1, 0], text=out_txt)
     res = demo.get_image()
     torch.cuda.empty_cache()
     # return Image.fromarray(res), stroke_inimg, stroke_refimg
