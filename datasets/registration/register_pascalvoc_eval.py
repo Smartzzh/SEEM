@@ -37,7 +37,7 @@ def load_pascalvoc_instances(name: str, dirname: str, mode: str, split: str):
     dicts = []
     for field in fileids:
         anno_path = os.path.join(dirname, "Annotations", "{}.xml".format(field))
-        image_path = os.path.join(dirname, "JPEGImages", "{}.jpg".format(field))
+        image_path = os.path.join(dirname, "JPEGImages", "{}.png".format(field))
         inst_path = os.path.join(dirname, "SegmentationObject", "{}.png".format(field))
         semseg_path = os.path.join(dirname, "SegmentationClass", "{}.png".format(field))
 
