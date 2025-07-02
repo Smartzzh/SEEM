@@ -25,7 +25,7 @@ from modeling.utils import configurable
 
 from ..visual_sampler.sampler import build_shape_sampler
 
-__all__ = ["COCOPanopticInteractiveDatasetMapper"]
+__all__ = ["LandslideDatasetMapper"]
 
 
 def build_transform_gen(cfg, is_train):
@@ -77,7 +77,7 @@ def convert_coco_poly_to_mask(segmentations, height, width):
     return masks
 
 # This is specifically designed for the COCO dataset.
-class COCOPanopticInteractiveDatasetMapper:
+class LandslideDatasetMapper:
     """
     A callable which takes a dataset dict in Detectron2 Dataset format,
     and map it into a format used by MaskFormer.
@@ -209,12 +209,6 @@ class COCOPanopticInteractiveDatasetMapper:
 
         if "pan_seg_file_name" in dataset_dict:
             pan_seg_gt = utils.read_image(dataset_dict.pop("pan_seg_file_name"), "RGB")
-            # 假设 `pan_seg_gt` 是你的 numpy 图像数组
-            # unique_pixels, counts = np.unique(pan_seg_gt.reshape(-1, pan_seg_gt.shape[2]), axis=0, return_counts=True)
-
-            # # 打印每种像素值及其数量
-            # for pixel, count in zip(unique_pixels, counts):
-            #     print(f"Pixel value {pixel} appears {count} times")
             segments_info = dataset_dict["segments_info"]
 
             # apply the same transformation to panoptic segmentation
@@ -232,7 +226,6 @@ class COCOPanopticInteractiveDatasetMapper:
                 if not segment_info["iscrowd"]:
                     classes.append(class_id)
                     masks.append(pan_seg_gt == segment_info["id"])
-                    # masks.append(pan_seg_gt == 65793)
                         
             is_things = [COCO_CATEGORIES[idx]['isthing'] for idx in classes]
             classes = np.array(classes)

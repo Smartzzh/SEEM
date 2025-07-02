@@ -342,7 +342,7 @@ def get_config_from_name(cfg, dataset_name):
     elif 'vlp' in dataset_name:
         cfg.update(cfg['VLP'])
         return cfg
-    elif 'coco' in dataset_name:
+    elif 'coco' in dataset_name: #coco 进入这个分支
         if 'COCO' in cfg.keys():
             cfg.update(cfg['COCO'])
         return cfg
@@ -427,7 +427,7 @@ def build_train_dataloader(cfg, ):
     
     loaders = {}
     for dataset_name in dataset_names:
-        cfg = get_config_from_name(cfg, dataset_name)
+        cfg = get_config_from_name(cfg, dataset_name)  #通过dataset_name获取对应的配置
         mapper_name = cfg['INPUT']['DATASET_MAPPER_NAME']
         # Semantic segmentation dataset mapper
         if mapper_name == "mask_former_semantic":
