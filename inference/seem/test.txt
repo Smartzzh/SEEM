@@ -1,0 +1,5 @@
+python inference/seem/infer_panoseg.py evaluate --conf_files configs/seem/focalt_unicl_lang_v0.yaml
+\
+
+
+python inference/seem/infer_panoseg_for2.py evaluate --conf_files configs/seem/focalt_unicl_lang_v0.yaml
